@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
+  
+  /* Rimoto Core Design Tokens */
+  --bg: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --black: #0A0A0A;
+  --text: #0A0A0A;
+  --text-2: #2A2A2A;
+  --muted: #777777;
+  --muted-l: #AAAAAA;
+  --accent: #EEFC50;
+  --accent-d: #D4E048;
+  --border: #E8E8E8;
+  --border-d: #CCCCCC;
+  --wa: #25D366;
+  --ok-bg: #25D366;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-montserrat);
+  --font-display: var(--font-bebas-neue);
+  
+  --color-bg: var(--bg);
+  --color-bg-card: var(--bg-card);
+  --color-black: var(--black);
+  --color-text-main: var(--text);
+  --color-text-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-muted-l: var(--muted-l);
+  --color-accent: var(--accent);
+  --color-accent-d: var(--accent-d);
+  --color-border-main: var(--border);
+  --color-border-d: var(--border-d);
+  --color-wa: var(--wa);
+  --color-success: var(--ok-bg);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Base utility overrides requested directly by the design to ensure crisp edges */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}

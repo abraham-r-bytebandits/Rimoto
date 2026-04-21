@@ -1,0 +1,51 @@
+name: Deploy Next.js App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 3. Install & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ec2-user/rimoto"
+
+      - name: Run app on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/rimoto
+
+            npm install --production
+            npm run build
+
+            sudo npm install -g pm2
+
+            pm2 delete rimoto || true
+            pm2 start npm --name "rimoto" -- start
+            pm2 save
