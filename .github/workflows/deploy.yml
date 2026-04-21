@@ -41,11 +41,19 @@ jobs:
           script: |
             cd /home/ec2-user/rimoto
 
-            npm install --production
-            npm run build
+            echo "Cleaning old files..."
+            rm -rf .next node_modules
 
+            echo "Installing dependencies..."
+            npm install
+
+            echo "Building project..."
+            npm run build || exit 1
+
+            echo "Starting app..."
             sudo npm install -g pm2
 
             pm2 delete rimoto || true
             pm2 start npm --name "rimoto" -- start
+
             pm2 save
