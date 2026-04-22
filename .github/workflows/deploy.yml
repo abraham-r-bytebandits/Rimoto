@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+
       - name: Install & Build
         run: |
           npm ci
@@ -42,8 +48,8 @@ jobs:
           script: |
             cd /home/ec2-user/rimoto-frontend
 
-            echo "Installing production deps..."
-            npm ci --omit=dev
+            echo "Installing production deps (only if needed)..."
+            [ -d "node_modules" ] || npm ci --omit=dev
 
             echo "Restarting app..."
             pm2 describe rimoto-frontend > /dev/null 2>&1 \
