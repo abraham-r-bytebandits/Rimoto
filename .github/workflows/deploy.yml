@@ -10,46 +10,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2. Setup Node (with built-in cache)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-
+      # 3. Install & Build
       - name: Install & Build
         run: |
           npm ci
           npm run build
 
-      # 👇 ONLY copy required files (huge speed improvement)
+      # 4. Copy ONLY required files
       - name: Copy build to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ".next,public,package.json,package-lock.json,next.config.ts"
+          source: ".next/**,public/**,package.json,package-lock.json,next.config.ts"
           target: "/home/ec2-user/rimoto-frontend"
 
-      - name: Start app on EC2 (NO BUILD)
+      # 5. Start app on EC2 (NO BUILD)
+      - name: Start app on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 20m
           script: |
             cd /home/ec2-user/rimoto-frontend
 
-            echo "Installing production deps (only if needed)..."
-            [ -d "node_modules" ] || npm ci --omit=dev
+            echo "Installing deps (only first time)..."
+            [ -d "node_modules" ] || npm install
 
             echo "Restarting app..."
             pm2 describe rimoto-frontend > /dev/null 2>&1 \
